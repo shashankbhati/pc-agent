@@ -15,7 +15,7 @@ Tools:
 - create_folder: {"path":"C:/path/folder"}
 - delete_file: {"path":"C:/path"}
 - move_file: {"src":"C:/src","dst":"C:/dst"}
-- open_app: {"name":"chrome|notepad|explorer|calculator|vscode|cmd|powershell|linkedin|youtube|gmail|github|google|whatsapp","browser":"edge|chrome|firefox"}
+- open_app: {"name":"any website name, domain, or app name","browser":"edge|chrome|firefox"}
 - system_info: {}
 - chat: {"response":"your reply"}
 

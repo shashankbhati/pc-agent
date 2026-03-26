@@ -106,32 +106,38 @@ def move_file(src: str, dst: str) -> str:
 
 
 def open_app(name: str, browser: str = "edge") -> str:
-    name_lower = name.lower()
+    name_lower = name.lower().strip()
 
-    # Check if it's a known website
-    url = SITES.get(name_lower)
-    if not url and name_lower.startswith("http"):
-        url = name_lower
+    browser_cmd = {
+        "edge": "start msedge",
+        "chrome": "start chrome",
+        "firefox": "start firefox",
+    }.get(browser.lower(), "start msedge")
 
-    if url:
-        browser_cmd = {
-            "edge": "start msedge",
-            "chrome": "start chrome",
-            "firefox": "start firefox",
-        }.get(browser.lower(), "start msedge")
-        try:
-            subprocess.Popen(f'{browser_cmd} "{url}"', shell=True)
-            return f"Opened {name} in {browser}"
-        except Exception as e:
-            return f"Error: {e}"
+    # Already a full URL
+    if name_lower.startswith("http://") or name_lower.startswith("https://"):
+        url = name
+    # Known site shortcut
+    elif name_lower in SITES:
+        url = SITES[name_lower]
+    # Looks like a domain (e.g. "reddit.com", "bbc.co.uk")
+    elif "." in name_lower and " " not in name_lower:
+        url = f"https://{name_lower}"
+    # Any other text — open as website name (e.g. "reddit" → "https://www.reddit.com")
+    else:
+        url = f"https://www.{name_lower}.com"
 
-    # Otherwise open as app
-    cmd = APPS.get(name_lower, f"start {name}")
     try:
-        subprocess.Popen(cmd, shell=True)
-        return f"Opened: {name}"
+        subprocess.Popen(f'{browser_cmd} "{url}"', shell=True)
+        return f"Opened {name} in {browser}"
     except Exception as e:
-        return f"Error: {e}"
+        # Fallback: try as desktop app
+        cmd = APPS.get(name_lower, f"start {name}")
+        try:
+            subprocess.Popen(cmd, shell=True)
+            return f"Opened: {name}"
+        except Exception as e2:
+            return f"Error: {e2}"
 
 
 def system_info() -> str:

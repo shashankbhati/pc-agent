@@ -18,6 +18,20 @@ APPS = {
     "cmd": "start cmd",
     "powershell": "start powershell",
     "task manager": "taskmgr",
+    "edge": "start msedge",
+}
+
+SITES = {
+    "linkedin": "https://www.linkedin.com",
+    "youtube": "https://www.youtube.com",
+    "gmail": "https://mail.google.com",
+    "github": "https://www.github.com",
+    "google": "https://www.google.com",
+    "whatsapp": "https://web.whatsapp.com",
+    "twitter": "https://www.twitter.com",
+    "instagram": "https://www.instagram.com",
+    "chatgpt": "https://chat.openai.com",
+    "netflix": "https://www.netflix.com",
 }
 
 
@@ -91,8 +105,28 @@ def move_file(src: str, dst: str) -> str:
         return f"Error: {e}"
 
 
-def open_app(name: str) -> str:
-    cmd = APPS.get(name.lower(), f"start {name}")
+def open_app(name: str, browser: str = "edge") -> str:
+    name_lower = name.lower()
+
+    # Check if it's a known website
+    url = SITES.get(name_lower)
+    if not url and name_lower.startswith("http"):
+        url = name_lower
+
+    if url:
+        browser_cmd = {
+            "edge": "start msedge",
+            "chrome": "start chrome",
+            "firefox": "start firefox",
+        }.get(browser.lower(), "start msedge")
+        try:
+            subprocess.Popen(f'{browser_cmd} "{url}"', shell=True)
+            return f"Opened {name} in {browser}"
+        except Exception as e:
+            return f"Error: {e}"
+
+    # Otherwise open as app
+    cmd = APPS.get(name_lower, f"start {name}")
     try:
         subprocess.Popen(cmd, shell=True)
         return f"Opened: {name}"
@@ -128,7 +162,7 @@ def execute_tool(tool: str, args: dict) -> str:
     elif tool == "move_file":
         return move_file(args.get("src", ""), args.get("dst", ""))
     elif tool == "open_app":
-        return open_app(args.get("name", ""))
+        return open_app(args.get("name", ""), args.get("browser", "edge"))
     elif tool == "system_info":
         return system_info()
     elif tool == "chat":
